@@ -1,0 +1,83 @@
+{
+  "execution_time_seconds": 32.44,
+  "execution_mode": "Concurrent ThreadPoolExecutor (2 workers)",
+  "timestamp_utc": "2026-10-06T12:54:38Z",
+  "sources_scraped": [
+    "Quotes to Scrape",
+    "Books to Scrape"
+  ],
+  "deduplication_mode": "remove",
+  "books": {
+    "records_collected": 1000,
+    "records_cleaned": 1000,
+    "records_rejected": 0,
+    "duplicates": 1,
+    "final_records": 999,
+    "pages_scraped": 80
+  },
+  "quotes": {
+    "records_collected": 100,
+    "records_cleaned": 100,
+    "records_rejected": 0,
+    "duplicates": 0,
+    "final_records": 100,
+    "pages_scraped": 10
+  },
+  "overall": {
+    "total_records_collected": 1100,
+    "total_records_cleaned": 1100,
+    "total_records_rejected": 0,
+    "total_duplicates": 1,
+    "final_record_count": 1099,
+    "validation_rate": 100.0
+  },
+  "validation_details": {
+    "total_inspected": 1100,
+    "rejection_reasons": {},
+    "sample_rejected_records": []
+  },
+  "final_dataset": {
+    "final_record_count": 1099,
+    "output_csv_file": "C:\\Users\\vishn\\Downloads\\Vishnuvardhan_Web_Scraping_Assignment\\output\\final_dataset.csv",
+    "summary_json_file": "C:\\Users\\vishn\\Downloads\\Vishnuvardhan_Web_Scraping_Assignment\\output\\summary_report.json"
+  },
+  "data_quality_metrics": {
+    "total_records": 1099,
+    "source_aware_completeness": {
+      "books": {
+        "name_or_title": 100.0,
+        "source_url": 100.0,
+        "category": 100.0,
+        "price": 100.0,
+        "rating": 100.0,
+        "availability": 100.0,
+        "description": 100.0,
+        "author": "N/A",
+        "tags": "N/A"
+      },
+      "quotes": {
+        "name_or_title": 100.0,
+        "source_url": 100.0,
+        "author": 100.0,
+        "tags": 97.0,
+        "description": 100.0,
+        "category": "N/A",
+        "price": "N/A",
+        "rating": "N/A",
+        "availability": "N/A"
+      }
+    },
+    "numeric_price_statistics": {
+      "count": 999,
+      "min": 10.0,
+      "max": 59.99,
+      "avg": 35.07
+    },
+    "numeric_rating_statistics": {
+      "count": 999,
+      "min": 1.0,
+      "max": 5.0,
+      "avg": 2.92
+    }
+  }
+}

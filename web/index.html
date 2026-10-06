@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataScrape Studio | Multi-Source Scraping & Consolidation Pipeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navbar -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">DataScrape <span class="gradient-text">Studio</span></h1>
+          <p class="brand-subtitle">Multi-Source Web Scraping & Consolidation Pipeline</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="status-indicator" id="statusIndicator">
+          <span class="status-dot"></span>
+          <span class="status-label">Pipeline Ready</span>
+        </div>
+        <button id="btnRunModal" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Run Scraper
+        </button>
+        <a id="btnExport" href="/api/export" class="btn btn-secondary" download>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export CSV
+        </a>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="tab-overview">Overview & Analytics</button>
+      <button class="tab-btn" data-tab="tab-dataset">Dataset Explorer</button>
+      <button class="tab-btn" data-tab="tab-logs">Execution Logs</button>
+    </nav>
+
+    <!-- TAB 1: OVERVIEW & ANALYTICS -->
+    <main id="tab-overview" class="tab-pane active">
+      <!-- KPI Cards -->
+      <section class="kpi-grid">
+        <div class="kpi-card card-glow-emerald">
+          <div class="kpi-header">
+            <span class="kpi-label">Total Consolidated</span>
+            <span class="kpi-icon">📦</span>
+          </div>
+          <div class="kpi-value" id="kpiTotalRecords">-</div>
+          <div class="kpi-sub">Cleaned & verified rows</div>
+        </div>
+
+        <div class="kpi-card card-glow-indigo">
+          <div class="kpi-header">
+            <span class="kpi-label">Books to Scrape</span>
+            <span class="kpi-icon">📚</span>
+          </div>
+          <div class="kpi-value" id="kpiBooksCount">-</div>
+          <div class="kpi-sub" id="kpiBooksSub">Catalogue records</div>
+        </div>
+
+        <div class="kpi-card card-glow-amber">
+          <div class="kpi-header">
+            <span class="kpi-label">Quotes to Scrape</span>
+            <span class="kpi-icon">💬</span>
+          </div>
+          <div class="kpi-value" id="kpiQuotesCount">-</div>
+          <div class="kpi-sub" id="kpiQuotesSub">Quote records</div>
+        </div>
+
+        <div class="kpi-card card-glow-rose">
+          <div class="kpi-header">
+            <span class="kpi-label">Duplicates Filtered</span>
+            <span class="kpi-icon">⚡</span>
+          </div>
+          <div class="kpi-value" id="kpiDuplicatesCount">-</div>
+          <div class="kpi-sub" id="kpiDuplicatesSub">Fuzzy fingerprint matched</div>
+        </div>
+
+        <div class="kpi-card card-glow-violet">
+          <div class="kpi-header">
+            <span class="kpi-label">Validation Pass Rate</span>
+            <span class="kpi-icon">🛡️</span>
+          </div>
+          <div class="kpi-value" id="kpiValidationRate">-</div>
+          <div class="kpi-sub" id="kpiValidationSub">Verified records</div>
+        </div>
+
+        <div class="kpi-card card-glow-cyan">
+          <div class="kpi-header">
+            <span class="kpi-label">Execution Duration</span>
+            <span class="kpi-icon">⏱️</span>
+          </div>
+          <div class="kpi-value" id="kpiDuration">-</div>
+          <div class="kpi-sub" id="kpiDurationSub">Execution Mode</div>
+        </div>
+      </section>
+
+      <!-- Analytics Breakdown -->
+      <section class="analytics-grid">
+        <!-- Completeness Card -->
+        <div class="analytics-card">
+          <h2 class="card-heading">Source-Aware Field Completeness</h2>
+          <p class="card-subheading">Availability across applicable fields per source</p>
+          <div id="completenessBars" class="bars-container">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Distributions Card -->
+        <div class="analytics-card">
+          <h2 class="card-heading">Dataset Metrics & Summary</h2>
+          <p class="card-subheading">Statistical distributions of scraped attributes</p>
+          <div class="stat-metrics-list" id="statMetricsList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Pipeline Architecture Info -->
+      <section class="info-card">
+        <h2 class="card-heading">Pipeline Stage Flow</h2>
+        <div class="pipeline-flow">
+          <div class="flow-step">
+            <span class="step-num">1</span>
+            <span class="step-title">Multi-Source Crawl</span>
+            <span class="step-desc">Requests + BeautifulSoup with exponential retry backoff</span>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <span class="step-num">2</span>
+            <span class="step-title">Data Cleaning</span>
+            <span class="step-desc">Whitespace trim, currency regex (£/Â£/$), rating word mapping</span>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <span class="step-num">3</span>
+            <span class="step-title">Validation</span>
+            <span class="step-desc">Schema constraint enforcement, URL check, category & author</span>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <span class="step-num">4</span>
+            <span class="step-title">Deduplication</span>
+            <span class="step-desc">Normalized text fingerprinting (casefold, punct stripping)</span>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <span class="step-num">5</span>
+            <span class="step-title">Consolidation</span>
+            <span class="step-desc">RFC 4180 CSV export + detailed JSON summary report</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- TAB 2: DATASET EXPLORER -->
+    <main id="tab-dataset" class="tab-pane">
+      <div class="explorer-toolbar">
+        <div class="search-input-wrapper">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Search by book title, quote text, author, or tags..." autocomplete="off">
+        </div>
+
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label for="filterSource">Source:</label>
+            <select id="filterSource">
+              <option value="all">All Sources</option>
+              <option value="books">Books to Scrape</option>
+              <option value="quotes">Quotes to Scrape</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterCategory">Category:</label>
+            <select id="filterCategory">
+              <option value="all">All Categories</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterRating">Rating:</label>
+            <select id="filterRating">
+              <option value="all">All Ratings</option>
+              <option value="5">★ 5 Stars</option>
+              <option value="4">★ 4 Stars</option>
+              <option value="3">★ 3 Stars</option>
+              <option value="2">★ 2 Stars</option>
+              <option value="1">★ 1 Star</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterPageSize">Rows:</label>
+            <select id="filterPageSize">
+              <option value="15">15</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">Source</th>
+              <th>Name / Title / Quote</th>
+              <th style="width: 100px;">Price</th>
+              <th style="width: 120px;">Rating</th>
+              <th style="width: 150px;">Author</th>
+              <th style="width: 140px;">Category</th>
+              <th style="width: 70px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr>
+              <td colspan="7" class="loading-state">Loading consolidated records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="pagination-footer">
+        <div class="pagination-info" id="paginationInfo">Showing 0-0 of 0 records</div>
+        <div class="pagination-actions">
+          <button id="btnPrevPage" class="btn btn-outline" disabled>Previous</button>
+          <span id="pageIndicator" class="page-indicator">Page 1</span>
+          <button id="btnNextPage" class="btn btn-outline" disabled>Next</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 3: LOGS VIEWER -->
+    <main id="tab-logs" class="tab-pane">
+      <div class="logs-toolbar">
+        <div>
+          <h2 class="card-heading">Live Pipeline Execution Logs</h2>
+          <p class="card-subheading">Streamed directly from logs/scraper.log</p>
+        </div>
+        <button id="btnRefreshLogs" class="btn btn-outline">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6"></path>
+            <path d="M1 20v-6h6"></path>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          Refresh Logs
+        </button>
+      </div>
+      <div class="terminal-window">
+        <pre id="logsOutput" class="terminal-content">Loading execution logs...</pre>
+      </div>
+    </main>
+
+    <!-- RECORD DETAIL MODAL -->
+    <div id="detailModal" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modalTitle">Record Detail</h3>
+          <button class="modal-close-btn" id="btnDetailClose">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TRIGGER RUN PIPELINE MODAL -->
+    <div id="runModal" class="modal-backdrop">
+      <div class="modal-card modal-compact">
+        <div class="modal-header">
+          <h3>Trigger Pipeline Scrape</h3>
+          <button class="modal-close-btn" id="btnRunClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="runForm">
+            <div class="form-group">
+              <label>Target Sources</label>
+              <select id="runSources" class="form-select">
+                <option value="all">Both Sources (Books + Quotes)</option>
+                <option value="books">Books to Scrape Only</option>
+                <option value="quotes">Quotes to Scrape Only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Page Limit per Source</label>
+              <select id="runMaxPages" class="form-select">
+                <option value="2">2 Pages (Quick Test ~3s)</option>
+                <option value="5">5 Pages (~6s)</option>
+                <option value="10">10 Pages (~10s)</option>
+                <option value="0">All Available Pages (Full Crawl ~25s)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Deduplication Action</label>
+              <select id="runDedupAction" class="form-select">
+                <option value="remove">Remove Duplicates (Default)</option>
+                <option value="flag">Flag Duplicates (is_duplicate = True)</option>
+              </select>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-outline" id="btnRunCancel">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btnRunSubmit">Start Crawl</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
