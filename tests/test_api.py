@@ -82,12 +82,17 @@ def test_api_root_endpoint():
     assert "Multi-Source Web Scraping API" in data.get("message", "")
 
 
-def test_trigger_pipeline_serverless_guard(monkeypatch):
-    """Verify POST /api/run safely rejects execution in Vercel environment."""
+def test_trigger_pipeline_serverless_demo_mode(monkeypatch):
+    """Verify POST /api/run returns the verified dataset in Vercel demo mode."""
     monkeypatch.setenv("VERCEL", "1")
-    response = client.post("/api/run", json={"sources": ["quotes"]})
-    assert response.status_code == 400
-    data = response.json()
-    assert data.get("status") == "error"
-    assert "Vercel serverless environment" in data.get("message", "")
 
+    response = client.post("/api/run", json={"sources": ["quotes"]})
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["status"] == "success"
+    assert data["mode"] == "demo"
+    assert "final_record_count" in data
+    assert data["final_record_count"] > 0
