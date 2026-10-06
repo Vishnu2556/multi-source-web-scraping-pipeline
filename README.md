@@ -1,7 +1,7 @@
 # Multi-Source Web Scraping & Data Consolidation Pipeline
 
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-39%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-46%20passed-brightgreen.svg)](tests/)
 [![Architecture](https://img.shields.io/badge/architecture-modular-orange.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-green.svg)]()
 
@@ -151,24 +151,67 @@ pip install -r requirements.txt
 
 ## 4. How to Run the Pipeline
 
-### Interactive Web Dashboard & REST API Server
-An interactive web dashboard is included to visually inspect metrics, explore records, trigger scraping jobs, and view logs in real time.
+### Live Demo (Vercel)
+**Live Demo:** [https://YOUR-VERCEL-DOMAIN.vercel.app](https://YOUR-VERCEL-DOMAIN.vercel.app)
+
+---
+
+### Deployment Architecture (Vercel Serverless + FastAPI)
+
+```
+                    Vercel Platform
+                           |
+             +-------------+-------------+
+             |                           |
+      Interactive Dashboard         FastAPI REST API
+          (Static Assets)             (api/index.py)
+                 |                           |
+        GET / (web/index.html)    +----------+----------+
+        GET /index.css            |          |          |
+        GET /app.js            /summary   /dataset    /logs
+                                  |          |          |
+                           summary_report  final_dataset scraper.log
+```
+
+- **Production Deployment:** Deployed on Vercel as a serverless application using [`api/index.py`](file:///c:/Users/vishn/Downloads/Vishnuvardhan_Web_Scraping_Assignment/api/index.py) (FastAPI) and [`vercel.json`](file:///c:/Users/vishn/Downloads/Vishnuvardhan_Web_Scraping_Assignment/vercel.json).
+- **Dataset Source:** Serves the pre-computed, consolidated production dataset (`output/final_dataset.csv` - 1,099 records) and execution summary report (`output/summary_report.json`).
+- **Serverless Constraints:** Full web scraping involves network rate-limiting and crawls across 60+ pages. In serverless environments (read-only filesystem, 10–60 second maximum execution timeouts), long-running scraping jobs must be executed locally via the CLI or dedicated background workers, while the deployed API and dashboard deliver fast, high-performance querying, filtering, and metric inspection.
+
+---
+
+### Local Scraper Execution (CLI)
+
+The primary local scraping engine runs via `main.py`:
 
 ```bash
-# Start the server (default port: 8000)
-python server.py
+# Standard CLI Run (Full Crawl - All 1,100 records from Books & Quotes)
+python main.py
+```
 
-# Or specify a custom port
-python server.py 8080
+### Local API & Dashboard Execution
+
+Run the FastAPI application locally using either `uvicorn` or `server.py`:
+
+```bash
+# Run with uvicorn (with hot reload)
+uvicorn api.index:app --reload
+
+# Or run using the launcher
+python server.py
 ```
 Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
-#### Available REST API Endpoints:
-- `GET  /api/summary` - Retrieves consolidated metrics and data quality statistics from `summary_report.json`.
-- `GET  /api/data` - Searchable, filterable, and paginated records (`?page=1&page_size=25&source=books&q=query`).
-- `GET  /api/logs` - Streams real-time execution logs from `logs/scraper.log`.
-- `GET  /api/export` - Direct download of `output/final_dataset.csv`.
-- `POST /api/run` - Trigger an on-demand scraper run with custom page caps or deduplication policies.
+#### Available API Endpoints:
+- `GET  /` - Interactive dark-themed Web Dashboard
+- `GET  /api/health` - Service health status, app name, and version
+- `GET  /api/summary` - Metrics, KPI counts, and data quality metrics from `summary_report.json`
+- `GET  /api/dataset` - Filtered & paginated consolidated records (`?page=1&page_size=25&source=all&q=`)
+- `GET  /api/data` - Route alias matching existing frontend explorer requests
+- `GET  /api/logs` - Execution log feed from `logs/scraper.log`
+- `GET  /api/export` - Direct RFC 4180 CSV attachment download (`final_dataset.csv`)
+- `POST /api/run` - Trigger scraping execution
+
+---
 
 ### Standard CLI Run (Full Crawl - All Pages from Both Sources)
 By default, the pipeline runs concurrently, scrapes all 50 catalog pages of Books to Scrape (1,000 books) and all 10 pages of Quotes to Scrape (100 quotes), applies cleaning, validation, and deduplication, and generates the outputs:
