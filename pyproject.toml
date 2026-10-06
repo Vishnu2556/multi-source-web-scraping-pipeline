@@ -1,3 +1,16 @@
+[project]
+name = "multi-source-web-scraping-pipeline"
+version = "1.0.0"
+description = "Multi-source web scraping and data processing pipeline with cleaning, validation, deduplication, and consolidated outputs"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "beautifulsoup4",
+    "fastapi",
+    "pandas",
+    "requests",
+    "uvicorn"
+]
+
 [tool.vercel]
 entrypoint = "api.index:app"
 
