@@ -4,6 +4,7 @@ Vercel Serverless Function & FastAPI Entrypoint for Multi-Source Web Scraping Pi
 import csv
 import json
 import logging
+import os
 from pathlib import Path
 import sys
 from typing import Any, Dict, List, Optional
@@ -52,6 +53,16 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 # API Endpoints
 # ---------------------------------------------------------------------------
+
+@app.get("/api")
+async def api_root():
+    """API root status endpoint."""
+    return {
+        "status": "ok",
+        "message": "Multi-Source Web Scraping API",
+        "version": "1.0.0",
+    }
+
 
 @app.get("/api/health")
 async def health_check():
@@ -257,6 +268,22 @@ async def trigger_pipeline(request: Request):
     max_records = payload.get("max_records", None)
     sources = payload.get("sources", ["all"])
     dedup_action = payload.get("dedup_action", "remove")
+
+    # Serverless runtime safety guard: avoid timeouts and read-only filesystem writes
+    if os.environ.get("VERCEL"):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "status": "error",
+                "message": (
+                    "Live scraping is disabled in the Vercel serverless environment "
+                    "due to execution timeouts and read-only filesystem restrictions. "
+                    "The deployed service is serving the pre-generated verified dataset "
+                    "(1,099 records) and summary report. Please run 'python main.py' locally "
+                    "for full live scraping."
+                ),
+            },
+        )
 
     try:
         logger = logging.getLogger("api_trigger")

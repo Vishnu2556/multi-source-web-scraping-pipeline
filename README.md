@@ -213,6 +213,35 @@ Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ---
 
+### Deployment & Execution Guide
+
+#### 1. Local Scraper (CLI)
+```bash
+python main.py
+```
+
+#### 2. Local API & Dashboard
+```bash
+uvicorn api.index:app --reload
+```
+or
+```bash
+python server.py
+```
+
+#### 3. Vercel Deployment
+To deploy to Vercel:
+1. Verify `pyproject.toml` contains `[tool.vercel] entrypoint = "api.index:app"` and `vercel.json` contains `{ "version": 2 }`.
+2. Commit and push the repository to GitHub:
+   ```bash
+   git add pyproject.toml vercel.json api/__init__.py api/index.py tests/test_api.py README.md
+   git commit -m "fix(vercel): configure valid python entrypoint and routing"
+   git push origin main
+   ```
+3. In the Vercel Dashboard, select your project and click **Redeploy** (or trigger a new deployment via git push). Vercel builds the Python runtime from `requirements.txt` and attaches the FastAPI ASGI application from `api.index:app`.
+
+---
+
 ### Standard CLI Run (Full Crawl - All Pages from Both Sources)
 By default, the pipeline runs concurrently, scrapes all 50 catalog pages of Books to Scrape (1,000 books) and all 10 pages of Quotes to Scrape (100 quotes), applies cleaning, validation, and deduplication, and generates the outputs:
 ```bash

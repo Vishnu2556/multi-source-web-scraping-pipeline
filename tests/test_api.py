@@ -71,3 +71,23 @@ def test_export_endpoint():
     response = client.get("/api/export")
     assert response.status_code == 200
     assert "text/csv" in response.headers.get("content-type", "")
+
+
+def test_api_root_endpoint():
+    """Verify GET /api returns status ok."""
+    response = client.get("/api")
+    assert response.status_code == 200
+    data = response.json()
+    assert data.get("status") == "ok"
+    assert "Multi-Source Web Scraping API" in data.get("message", "")
+
+
+def test_trigger_pipeline_serverless_guard(monkeypatch):
+    """Verify POST /api/run safely rejects execution in Vercel environment."""
+    monkeypatch.setenv("VERCEL", "1")
+    response = client.post("/api/run", json={"sources": ["quotes"]})
+    assert response.status_code == 400
+    data = response.json()
+    assert data.get("status") == "error"
+    assert "Vercel serverless environment" in data.get("message", "")
+
